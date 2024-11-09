@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'sonarqube' // SonarQube server configured in Jenkins
-        SONAR_TOKEN = credentials('SonarQube-Secret') // SonarQube token from Jenkins credentials
-        SONAR_PROJECT_KEY = 'emoji_game' // Set the project key for SonarQube
+        // SONARQUBE = 'sonarqube' // SonarQube server configured in Jenkins
+        // SONAR_TOKEN = credentials('SonarQube-Secret') // SonarQube token from Jenkins credentials
+        // SONAR_PROJECT_KEY = 'emoji_game' // Set the project key for SonarQube
         IMAGE_NAME = "hardikagrawal2320/emoji-game"
         VERSION_TAG = "${BUILD_NUMBER}" // Use Jenkins build number as version tag
          
@@ -20,14 +20,9 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner';
-                    // Run sonar-scanner with injected token and project key
-                    sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=emoji_game \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://192.168.56.101:9000 \
-                            -Dsonar.token=${SONAR_TOKEN}
-                    """
+                    withSonarQubeEnv() {
+                      sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
         }
