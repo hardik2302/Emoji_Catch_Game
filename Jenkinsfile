@@ -16,6 +16,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    def scannerHome = tool 'SonarScanner';
                     withCredentials([string(credentialsId: 'emoji_game', variable: 'emoji_game')]) {
                     withSonarQubeEnv() {
                         // Run SonarScanner for the first project
