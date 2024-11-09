@@ -19,9 +19,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    def scannerHome = tool 'SonarScanner';
                     // Run sonar-scanner with injected token and project key
                     sh """
-                        sonar-scanner \
+                        ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=emoji_game \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://192.168.56.101:9000 \
