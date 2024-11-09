@@ -1,10 +1,16 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'DEPLOY_ENV', choices: ['blue', 'green'], description: 'Choose which environment to deploy: Blue or Green')
+        choice(name: 'DOCKER_TAG', choices: ['blue', 'green'], description: 'Choose the Docker image tag for the deployment')
+        booleanParam(name: 'SWITCH_TRAFFIC', defaultValue: false, description: 'Switch traffic between Blue and Green')
+    }
+    
     environment {
         IMAGE_NAME = "hardikagrawal2320/emoji-game"
-        VERSION_TAG = "${BUILD_NUMBER}" // Use Jenkins build number as version tag
-         
+        VERSION_TAG = "${BUILD_NUMBER}" // Use Jenkins build number as version tag      
+        TAG = "${params.DOCKER_TAG}"  // The image tag now comes from the parameter
     }
 
     stages {
@@ -69,9 +75,28 @@ pipeline {
                         // Also push the image with 'latest' tag
                         sh "docker tag ${IMAGE_NAME}:${VERSION_TAG} ${IMAGE_NAME}:latest"
                         sh "docker push ${IMAGE_NAME}:latest"
+                        // Also push the image with 'blue' or 'green' tag
+                        sh "docker tag ${IMAGE_NAME}:${VERSION_TAG} ${IMAGE_NAME}:${TAG}"
+                        sh "docker push ${IMAGE_NAME}:${TAG}"
                     }
                 }
             }
         }
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         script {
+        //             def deploymentFile = ""
+        //             if (params.DEPLOY_ENV == 'blue') {
+        //                 deploymentFile = 'app-deployment-blue.yml'
+        //             } else {
+        //                 deploymentFile = 'app-deployment-green.yml'
+        //             }
+
+        //             withKubeConfig(caCertificate: '', clusterName: 'devopsshack-cluster', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://46743932FDE6B34C74566F392E30CABA.gr7.ap-south-1.eks.amazonaws.com') {
+        //                 sh "kubectl apply -f ${deploymentFile} -n ${KUBE_NAMESPACE}"
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
