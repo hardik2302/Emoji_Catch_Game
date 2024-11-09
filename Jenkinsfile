@@ -20,8 +20,19 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarScanner';
-                    withSonarQubeEnv() {
-                      sh "${scannerHome}/bin/sonar-scanner"
+                    // withSonarQubeEnv() {
+                    //   sh "${scannerHome}/bin/sonar-scanner"
+                    // }
+                        withSonarQubeEnv('SonarQube') {
+                            // Run SonarScanner for the first project
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                    -Dsonar.projectKey=emoji_game \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.host.url="http://192.168.56.101:9000" \
+                                    -Dsonar.token="sqp_7a687f942fc5c22328d710b829706267e424f14e"
+                            """
+
                     }
                 }
             }
