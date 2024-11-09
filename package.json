@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "jest": {
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["lcov", "text-summary"]
+  }
+}
