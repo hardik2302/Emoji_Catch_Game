@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emoji-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emoji
+      version: green
+  template:
+    metadata:
+      labels:
+        app: emoji
+        version: green
+    spec:
+      containers:
+      - name: emoji
+        image: hardikagrawal2320/emoji-game:green # Adjust the image tag for the green version
+        ports:
+        - containerPort: 3000
