@@ -16,6 +16,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    withCredentials([string(credentialsId: 'emoji_game', variable: 'emoji_game')]) {
                     withSonarQubeEnv() {
                         // Run SonarScanner for the first project
                         sh """
@@ -23,8 +24,9 @@ pipeline {
                                 -Dsonar.projectKey=emoji_game \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url="http://192.168.56.101:9000" \
-                                -Dsonar.token="sqp_7a687f942fc5c22328d710b829706267e424f14e"
+                                -Dsonar.token=${emoji_game}
                         """
+                    }
                     }
                 }
             }
