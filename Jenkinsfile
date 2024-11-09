@@ -19,10 +19,14 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    withSonarQubeEnv('sonarqube') { // Use the correct SonarQube server name
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
+                    // Run sonar-scanner with injected token and project key
+                    sh """
+                        sonar-scanner \
+                            -Dsonar.projectKey=emoji_game \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://192.168.56.101:9000 \
+                            -Dsonar.token=${SONAR_TOKEN}
+                    """
                 }
             }
         }
