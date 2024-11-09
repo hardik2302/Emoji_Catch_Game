@@ -42,7 +42,6 @@ pipeline {
                                     -Dsonar.sources=. \
                                     -Dsonar.host.url="http://192.168.56.101:9000" \
                                     -Dsonar.token=${emoji_game}
-                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov-report/index.html
                             """
                         }
                     }
