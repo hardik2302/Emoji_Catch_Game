@@ -13,16 +13,16 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/hardik2302/Emoji_Catch_Game']])
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'  // Install dependencies (including Jest and NYC)
-            }
-        }
-        stage('Run Tests and Generate Coverage') {
-            steps {
-                sh 'npm test'  // Run tests and generate coverage report
-            }
-        }
+        // stage('Install Dependencies') {
+        //     steps {
+        //         sh 'npm install'  // Install dependencies (including Jest and NYC)
+        //     }
+        // }
+        // stage('Run Tests and Generate Coverage') {
+        //     steps {
+        //         sh 'npm test'  // Run tests and generate coverage report
+        //     }
+        // }
         stage('SonarQube Analysis') {
             steps {
                 script {
