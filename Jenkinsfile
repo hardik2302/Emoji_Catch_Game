@@ -23,7 +23,7 @@ pipeline {
                     // withSonarQubeEnv() {
                     //   sh "${scannerHome}/bin/sonar-scanner"
                     // }
-                        withSonarQubeEnv('SonarQube') {
+                        withSonarQubeEnv() {
                             // Run SonarScanner for the first project
                             sh """
                                 ${scannerHome}/bin/sonar-scanner \
