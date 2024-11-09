@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emoji-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emoji
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: emoji
+        version: blue
+    spec:
+      containers:
+      - name: emoji
+        image: hardikagrawal2320/emoji-game:blue # Adjust the image tag for the blue version
+        ports:
+        - containerPort: 3000
