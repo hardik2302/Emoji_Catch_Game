@@ -13,6 +13,16 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/hardik2302/Emoji_Catch_Game']])
             }
         }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'  // Install dependencies (including Jest and NYC)
+            }
+        }
+        stage('Run Tests and Generate Coverage') {
+            steps {
+                sh 'npm test'  // Run tests and generate coverage report
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -26,6 +36,7 @@ pipeline {
                                     -Dsonar.sources=. \
                                     -Dsonar.host.url="http://192.168.56.101:9000" \
                                     -Dsonar.token=${emoji_game}
+                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov-report/index.html
                             """
                         }
                     }
