@@ -7,7 +7,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'emoji_game' // Set the project key for SonarQube
         IMAGE_NAME = "hardikagrawal2320/emoji-game"
         VERSION_TAG = "${BUILD_NUMBER}" // Use Jenkins build number as version tag
-        SONARQUBE_URL 
+         
     }
 
     stages {
