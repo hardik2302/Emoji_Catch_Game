@@ -7,6 +7,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'emoji_game' // Set the project key for SonarQube
         IMAGE_NAME = "hardikagrawal2320/emoji-game"
         VERSION_TAG = "${BUILD_NUMBER}" // Use Jenkins build number as version tag
+        SONARQUBE_URL 
     }
 
     stages {
@@ -18,14 +19,9 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'SonarScanner' // SonarQube Scanner tool installed in Jenkins
-                    withSonarQubeEnv(SONARQUBE) {
-                        sh "${scannerHome}/bin/sonar-scanner " +
-                           "-Dsonar.projectKey=${SONAR_PROJECT_KEY} " +
-                           "-Dsonar.projectName='Emoji Catch Game' " +
-                           "-Dsonar.sources=. " +
-                           "-Dsonar.host.url=$SONARQUBE_URL " +
-                           "-Dsonar.login=$SONAR_TOKEN"
+                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    withSonarQubeEnv('sonarqube') { // Use the correct SonarQube server name
+                        sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
             }
