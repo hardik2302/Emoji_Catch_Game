@@ -19,44 +19,25 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/hardik2302/Emoji_Catch_Game']])
             }
         }
-        // stage('Install Dependencies') {
-        //     steps {
-        //         sh 'npm install'  // Install dependencies (including Jest and NYC)
-        //     }
-        // }
-        // stage('Run Tests and Generate Coverage') {
-        //     steps {
-        //         sh 'npm test'  // Run tests and generate coverage report
-        //     }
-        // }
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         script {
-        //             def scannerHome = tool 'SonarScanner';
-        //             withCredentials([string(credentialsId: 'emoji_game', variable: 'emoji_game')]) {
-        //                 withSonarQubeEnv() {
-        //                     // Run SonarScanner for the first project
-        //                     sh """
-        //                         ${scannerHome}/bin/sonar-scanner \
-        //                             -Dsonar.projectKey=emoji_game \
-        //                             -Dsonar.sources=. \
-        //                             -Dsonar.host.url="http://192.168.56.101:9000" \
-        //                             -Dsonar.token=${emoji_game}
-        //                     """
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Quality Gate') {
-        //     steps {
-        //         script {
-        //             timeout(time: 1, unit: 'MINUTES') {
-        //                 waitForQualityGate abortPipeline: true
-        //             }
-        //         }
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner';
+                    withCredentials([string(credentialsId: 'emoji_game', variable: 'emoji_game')]) {
+                        withSonarQubeEnv() {
+                            // Run SonarScanner for the first project
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                    -Dsonar.projectKey=emoji_game \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.host.url="http://192.168.56.101:9000" \
+                                    -Dsonar.token=${emoji_game}
+                            """
+                        }
+                    }
+                }
+            }
+        }
         stage('Docker build') {
             steps {
                 script {
@@ -91,13 +72,12 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                    withCredentials([
-                        string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')
-                    ]) {
-                        script {
-                           def deploymentFile = params.DEPLOY_ENV == 'blue' ? 'app-deployment-blue.yml' : 'app-deployment-green.yml'
-                           sh "kubectl apply -f ${deploymentFile}"
-                      }
+                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')]) {
+                    script {
+                        def deploymentFile = params.DEPLOY_ENV == 'blue' ? 'app-deployment-blue.yml' : 'app-deployment-green.yml'
+                        // Apply the selected environment's deployment YAML file
+                        sh "kubectl apply -f ${deploymentFile}"
+                    }
                 }
             }
         }
@@ -106,16 +86,14 @@ pipeline {
                 expression { params.SWITCH_TRAFFIC }
             }
             steps {
-                withCredentials([
-                    string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')
-                ]) {
+                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')]) {
                     script {
-                    // Update the service selector to point to the selected environment
-                    sh """
-                    kubectl patch service emoji-service -p '{\"spec\":{\"selector\":{\"app\":\"emoji\",\"version\":\"${params.DEPLOY_ENV}\"}}}'
-                    """
+                        // Update the service selector to point to the selected environment
+                        sh """
+                        kubectl patch service emoji-service -p '{\"spec\":{\"selector\":{\"app\":\"emoji\",\"version\":\"${params.DEPLOY_ENV}\"}}}'
+                        """
+                    }
                 }
-            }
             }
         }
         stage('Scale Down Previous Deployment') {
@@ -123,15 +101,13 @@ pipeline {
                 expression { params.SWITCH_TRAFFIC }
             }
             steps {
-                withCredentials([
-                    string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')
-                ]) {
+                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')]) {
                     script {
-                    // Scale down the other deployment to save resources
-                    def oppositeEnv = (params.DEPLOY_ENV == 'blue') ? 'green' : 'blue'
-                    sh "kubectl scale deployment emoji-${oppositeEnv} --replicas=0"
+                        // Scale down the opposite deployment (e.g., if blue is active, scale down green)
+                        def oppositeEnv = (params.DEPLOY_ENV == 'blue') ? 'green' : 'blue'
+                        sh "kubectl scale deployment emoji-${oppositeEnv} --replicas=0"
+                    }
                 }
-            }
             }
         }
     }
