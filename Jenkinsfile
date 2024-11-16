@@ -29,7 +29,7 @@ pipeline {
         //         sh 'npm test'  // Run tests and generate coverage report
         //     }
         // }
-        stage('SonarQube Analysis') {
+        // stage('SonarQube Analysis') {
         //     steps {
         //         script {
         //             def scannerHome = tool 'SonarScanner';
