@@ -19,3 +19,6 @@ Before setting up this project, ensure you have the following installed:
 2. Docker (for building and running containers)
 3. kubectl (for deploying to Kubernetes)
 4. Jenkins (if running the CI/CD pipeline locally)
+
+## Screenshots
+![image](https://github.com/user-attachments/assets/af488f9f-32a6-4e35-87ae-6d6ad7ff903b)
