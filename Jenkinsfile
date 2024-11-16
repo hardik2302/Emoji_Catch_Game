@@ -81,21 +81,46 @@ pipeline {
                 }
             }
         }
-        // stage('Deploy to Kubernetes') {
-        //     steps {
-        //         script {
-        //             def deploymentFile = ""
-        //             if (params.DEPLOY_ENV == 'blue') {
-        //                 deploymentFile = 'app-deployment-blue.yml'
-        //             } else {
-        //                 deploymentFile = 'app-deployment-green.yml'
-        //             }
-
-        //             withKubeConfig(caCertificate: '', clusterName: 'devopsshack-cluster', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://46743932FDE6B34C74566F392E30CABA.gr7.ap-south-1.eks.amazonaws.com') {
-        //                 sh "kubectl apply -f ${deploymentFile} -n ${KUBE_NAMESPACE}"
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Deploy Service') {
+            steps {
+                script {
+                    // Apply the service YAML file to ensure the service exists
+                    sh "kubectl apply -f emoji-service.yml"
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    def deploymentFile = params.DEPLOY_ENV == 'blue' ? 'app-deployment-blue.yml' : 'app-deployment-green.yml'
+                    sh "kubectl apply -f ${deploymentFile}"
+                }
+            }
+        }
+        stage('Switch Traffic (if enabled)') {
+            when {
+                expression { params.SWITCH_TRAFFIC }
+            }
+            steps {
+                script {
+                    // Update the service selector to point to the selected environment
+                    sh """
+                    kubectl patch service emoji-service -p '{\"spec\":{\"selector\":{\"app\":\"emoji\",\"version\":\"${params.DEPLOY_ENV}\"}}}'
+                    """
+                }
+            }
+        }
+        stage('Scale Down Previous Deployment') {
+            when {
+                expression { params.SWITCH_TRAFFIC }
+            }
+            steps {
+                script {
+                    // Scale down the other deployment to save resources
+                    def oppositeEnv = (params.DEPLOY_ENV == 'blue') ? 'green' : 'blue'
+                    sh "kubectl scale deployment emoji-${oppositeEnv} --replicas=0"
+                }
+            }
+        }
     }
 }
