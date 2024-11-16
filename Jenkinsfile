@@ -30,24 +30,24 @@ pipeline {
         //     }
         // }
         stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner';
-                    withCredentials([string(credentialsId: 'emoji_game', variable: 'emoji_game')]) {
-                        withSonarQubeEnv() {
-                            // Run SonarScanner for the first project
-                            sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                    -Dsonar.projectKey=emoji_game \
-                                    -Dsonar.sources=. \
-                                    -Dsonar.host.url="http://192.168.56.101:9000" \
-                                    -Dsonar.token=${emoji_game}
-                            """
-                        }
-                    }
-                }
-            }
-        }
+        //     steps {
+        //         script {
+        //             def scannerHome = tool 'SonarScanner';
+        //             withCredentials([string(credentialsId: 'emoji_game', variable: 'emoji_game')]) {
+        //                 withSonarQubeEnv() {
+        //                     // Run SonarScanner for the first project
+        //                     sh """
+        //                         ${scannerHome}/bin/sonar-scanner \
+        //                             -Dsonar.projectKey=emoji_game \
+        //                             -Dsonar.sources=. \
+        //                             -Dsonar.host.url="http://192.168.56.101:9000" \
+        //                             -Dsonar.token=${emoji_game}
+        //                     """
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
         // stage('Quality Gate') {
         //     steps {
         //         script {
