@@ -91,9 +91,13 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    def deploymentFile = params.DEPLOY_ENV == 'blue' ? 'app-deployment-blue.yml' : 'app-deployment-green.yml'
-                    sh "kubectl apply -f ${deploymentFile}"
+                    withCredentials([
+                        string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')
+                    ]) {
+                        script {
+                           def deploymentFile = params.DEPLOY_ENV == 'blue' ? 'app-deployment-blue.yml' : 'app-deployment-green.yml'
+                           sh "kubectl apply -f ${deploymentFile}"
+                      }
                 }
             }
         }
@@ -102,12 +106,16 @@ pipeline {
                 expression { params.SWITCH_TRAFFIC }
             }
             steps {
-                script {
+                withCredentials([
+                    string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')
+                ]) {
+                    script {
                     // Update the service selector to point to the selected environment
                     sh """
                     kubectl patch service emoji-service -p '{\"spec\":{\"selector\":{\"app\":\"emoji\",\"version\":\"${params.DEPLOY_ENV}\"}}}'
                     """
                 }
+            }
             }
         }
         stage('Scale Down Previous Deployment') {
@@ -115,11 +123,15 @@ pipeline {
                 expression { params.SWITCH_TRAFFIC }
             }
             steps {
-                script {
+                withCredentials([
+                    string(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')
+                ]) {
+                    script {
                     // Scale down the other deployment to save resources
                     def oppositeEnv = (params.DEPLOY_ENV == 'blue') ? 'green' : 'blue'
                     sh "kubectl scale deployment emoji-${oppositeEnv} --replicas=0"
                 }
+            }
             }
         }
     }
